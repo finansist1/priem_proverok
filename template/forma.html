@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сдача проверок</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8d7da, #1f1f1f);
+            color: #222;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .form-header {
+            padding: 30px;
+            color: #ffe3e6;
+            background: #2b2b2b;
+            border-top: 10px solid #e57373;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .form-header p {
+            margin: 10px 0 0;
+            color: #f5b5bb;
+            font-size: 16px;
+        }
+
+        form {
+            padding: 30px;
+            background: #fff5f6;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            padding: 20px;
+            background: #fff;
+            border-left: 5px solid #e57373;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2b2b2b;
+            font-weight: 600;
+        }
+
+        input,
+        textarea,
+        select {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 16px;
+            background: #fffafa;
+            border: none;
+            border-bottom: 2px solid #d98b91;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            background: #fff;
+            border-bottom-color: #b71c1c;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            padding: 14px 30px;
+            color: #ffe3e6;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            background: #2b2b2b;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            color: #1f1f1f;
+            background: #e57373;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            z-index: 1000;
+            top: 100%;
+            right: 0;
+            left: 0;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #d98b91;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.18);
+        }
+
+        .autocomplete-item,
+        .autocomplete-empty {
+            padding: 10px 12px;
+            font-size: 14px;
+        }
+
+        .autocomplete-item {
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background: #ffe3e6;
+        }
+
+        .autocomplete-empty {
+            color: #777;
+        }
+
+        .source-data {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-header">
+            <h1>Форма для сдачи проверок</h1>
+            <p>Заполни форму — и отправляй :)</p>
+        </div>
+
+        <form id="check-form">
+            <div class="form-group">
+                <label for="name">Направление</label>
+                <div class="autocomplete-container">
+                    <input type="text" id="name" name="name" placeholder="Начните вводить направление деятельности" autocomplete="off" required>
+                    <div id="name-suggestions" class="autocomplete-list"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="num_proverki">Счёт проверки оплат</label>
+                <div class="autocomplete-container">
+                    <input type="text" id="num_proverki" name="num_proverki" placeholder="Начните вводить счёт проверки оплат" autocomplete="off" required>
+                    <div id="num-proverki-suggestions" class="autocomplete-list"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="account_num">Номер счёта перевозчика</label>
+                <div class="autocomplete-container">
+                    <input type="text" id="account_num" name="account_num" placeholder="Начните вводить счёт перевозчика" autocomplete="off" required>
+                    <div id="account-num-suggestions" class="autocomplete-list"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Дата начала</label>
+                <input type="date" id="start_date" name="start_date">
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">Дата конца</label>
+                <input type="date" id="end_date" name="end_date">
+            </div>
+
+            <div class="form-group">
+                <label for="income">Сумма дохода</label>
+                <input id="income" name="income" placeholder="Введите сумму дохода">
+            </div>
+
+            <div class="form-group">
+                <label for="expense">Сумма расхода</label>
+                <input id="expense" name="expense" placeholder="Введите сумму расхода">
+            </div>
+
+            <div class="form-group">
+                <label for="fuel">Топливо</label>
+                <input id="fuel" name="fuel" placeholder="Введите сумму топлива">
+            </div>
+
+            <div class="form-group">
+                <label for="fine">Штраф</label>
+                <input id="fine" name="fine" placeholder="Введите сумму штрафа">
+            </div>
+
+            <div class="form-group">
+                <label for="prepayment">Аванс</label>
+                <input id="prepayment" name="prepayment" placeholder="Введите сумму аванса">
+            </div>
+
+            <div class="form-group">
+                <label for="comment">Комментарий</label>
+                <input id="comment" name="comment" placeholder="Здесь можно написать комментарий">
+            </div>
+
+            <button id="button" type="submit">Отправить</button>
+        </form>
+    </div>
+
+    <div id="business-lines-data" class="source-data">
+        {% for value in business_lines %}
+            <span data-value="{{ value }}"></span>
+        {% endfor %}
+    </div>
+    <div id="nums-inspections-data" class="source-data">
+        {% for value in nums_inspections %}
+            <span data-value="{{ value }}"></span>
+        {% endfor %}
+    </div>
+    <div id="account-nums-data" class="source-data">
+        {% for value in account_nums %}
+            <span data-value="{{ value }}"></span>
+        {% endfor %}
+    </div>
+
+    <script>
+        function readValues(containerId) {
+            return Array.from(
+                document.querySelectorAll(`#${containerId} [data-value]`),
+                element => element.dataset.value
+            );
+        }
+
+        function createAutocomplete(inputId, suggestionsId, values, maxResults = 50) {
+            const input = document.getElementById(inputId);
+            const suggestions = document.getElementById(suggestionsId);
+            const valuesSet = new Set(values);
+            const preparedValues = values.map(value => ({
+                original: value,
+                normalized: String(value).toLowerCase()
+            }));
+            let currentMatches = [];
+            let activeIndex = -1;
+
+            function closeSuggestions() {
+                suggestions.innerHTML = '';
+                suggestions.style.display = 'none';
+                currentMatches = [];
+                activeIndex = -1;
+            }
+
+            function selectValue(value) {
+                input.value = value;
+                closeSuggestions();
+                input.focus();
+            }
+
+            function renderSuggestions() {
+                const search = input.value.trim().toLowerCase();
+                suggestions.innerHTML = '';
+                activeIndex = -1;
+
+                if (!search) {
+                    closeSuggestions();
+                    return;
+                }
+
+                const startsWith = [];
+                const contains = [];
+                for (const value of preparedValues) {
+                    if (value.normalized.startsWith(search)) {
+                        startsWith.push(value.original);
+                    } else if (value.normalized.includes(search)) {
+                        contains.push(value.original);
+                    }
+                }
+
+                currentMatches = [...startsWith, ...contains].slice(0, maxResults);
+                if (currentMatches.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.className = 'autocomplete-empty';
+                    empty.textContent = 'Совпадений не найдено';
+                    suggestions.appendChild(empty);
+                    suggestions.style.display = 'block';
+                    return;
+                }
+
+                for (const value of currentMatches) {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.textContent = value;
+                    item.addEventListener('mousedown', event => {
+                        event.preventDefault();
+                        selectValue(value);
+                    });
+                    suggestions.appendChild(item);
+                }
+                suggestions.style.display = 'block';
+            }
+
+            function updateActiveItem() {
+                const items = suggestions.querySelectorAll('.autocomplete-item');
+                items.forEach(item => item.classList.remove('active'));
+                if (activeIndex >= 0 && items[activeIndex]) {
+                    items[activeIndex].classList.add('active');
+                    items[activeIndex].scrollIntoView({ block: 'nearest' });
+                }
+            }
+
+            input.addEventListener('input', renderSuggestions);
+            input.addEventListener('keydown', event => {
+                if (event.key === 'ArrowDown' && currentMatches.length > 0) {
+                    event.preventDefault();
+                    activeIndex = (activeIndex + 1) % currentMatches.length;
+                    updateActiveItem();
+                } else if (event.key === 'ArrowUp' && currentMatches.length > 0) {
+                    event.preventDefault();
+                    activeIndex = (activeIndex - 1 + currentMatches.length) % currentMatches.length;
+                    updateActiveItem();
+                } else if (event.key === 'Enter' && activeIndex >= 0) {
+                    event.preventDefault();
+                    selectValue(currentMatches[activeIndex]);
+                } else if (event.key === 'Escape') {
+                    closeSuggestions();
+                }
+            });
+            input.addEventListener('blur', () => setTimeout(closeSuggestions, 150));
+
+            return {
+                getValue: () => input.value.trim(),
+                isValid: () => valuesSet.has(input.value.trim())
+            };
+        }
+
+        const businessLineAutocomplete = createAutocomplete(
+            'name', 'name-suggestions', readValues('business-lines-data')
+        );
+        const inspectionAutocomplete = createAutocomplete(
+            'num_proverki', 'num-proverki-suggestions', readValues('nums-inspections-data')
+        );
+        const accountAutocomplete = createAutocomplete(
+            'account_num', 'account-num-suggestions', readValues('account-nums-data')
+        );
+
+        const form = document.getElementById('check-form');
+        const button = document.getElementById('button');
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            const autocompleteFields = [
+                {
+                    autocomplete: businessLineAutocomplete,
+                    inputId: 'name',
+                    error: 'Некорректное направление деятельности, исправьте!'
+                },
+                {
+                    autocomplete: inspectionAutocomplete,
+                    inputId: 'num_proverki',
+                    error: 'Некорректный счёт проверки оплат, исправьте!'
+                },
+                {
+                    autocomplete: accountAutocomplete,
+                    inputId: 'account_num',
+                    error: 'Некорректный счёт перевозчика, исправьте!'
+                }
+            ];
+
+            for (const field of autocompleteFields) {
+                if (!field.autocomplete.isValid()) {
+                    alert(field.error);
+                    document.getElementById(field.inputId).focus();
+                    return;
+                }
+            }
+
+            const payload = {
+                name: businessLineAutocomplete.getValue(),
+                num_proverki: inspectionAutocomplete.getValue(),
+                account_num: accountAutocomplete.getValue(),
+                start_date: document.getElementById('start_date').value,
+                end_date: document.getElementById('end_date').value,
+                income: document.getElementById('income').value,
+                expense: document.getElementById('expense').value,
+                comment: document.getElementById('comment').value,
+                fine: document.getElementById('fine').value,
+                prepayment: document.getElementById('prepayment').value,
+                fuel: document.getElementById('fuel').value
+            };
+
+            button.textContent = 'Отправка...';
+            button.disabled = true;
+
+            fetch('http://127.0.0.1:8000/senddata', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Данные были отправлены, ожидайте окончания проверки!');
+                        form.reset();
+                        return;
+                    }
+                    return response.json().then(error => {
+                        alert(`Ошибка сервера: ${error.detail}`);
+                    });
+                })
+                .catch(error => {
+                    console.error('Ошибка сети:', error);
+                    alert('Не удалось связаться с FastAPI сервером. Убедитесь, что он запущен.');
+                })
+                .finally(() => {
+                    button.textContent = 'Отправить';
+                    button.disabled = false;
+                });
+        });
+    </script>
+</body>
+</html>
