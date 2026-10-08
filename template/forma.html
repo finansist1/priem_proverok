@@ -14,7 +14,7 @@
         }
 
         .container {
-            max-width: 700px;
+            max-width: 1200px;
             margin: 50px auto;
             padding: 20px;
         }
@@ -40,6 +40,9 @@
         }
 
         form {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
             padding: 30px;
             background: #fff5f6;
             border-radius: 0 0 14px 14px;
@@ -47,7 +50,7 @@
         }
 
         .form-group {
-            margin-bottom: 18px;
+            min-width: 0;
             padding: 20px;
             background: #fff;
             border-left: 5px solid #e57373;
@@ -158,6 +161,56 @@
         .source-data {
             display: none;
         }
+
+        .selected-values {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .selected-value {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 100%;
+            padding: 6px 10px;
+            background: #ffe3e6;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .selected-value span {
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        .selected-value button {
+            padding: 2px 6px;
+            flex-shrink: 0;
+        }
+
+        .field-hint {
+            margin: 8px 0 0;
+            color: #666;
+            font-size: 12px;
+        }
+
+        #button {
+            grid-column: 1 / -1;
+            justify-self: start;
+        }
+
+        @media (max-width: 1000px) {
+            form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 640px) {
+            .container { margin: 20px auto; padding: 12px; }
+            form { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+            .form-header { padding: 20px; }
+            .form-header h1 { font-size: 24px; }
+        }
     </style>
 </head>
 <body>
@@ -169,11 +222,13 @@
 
         <form id="check-form">
             <div class="form-group">
-                <label for="name">Направление</label>
+                <label for="name">Направление деятельности</label>
                 <div class="autocomplete-container">
-                    <input type="text" id="name" name="name" placeholder="Начните вводить направление деятельности" autocomplete="off" required>
+                    <input type="text" id="name" name="name" placeholder="Начните вводить направление деятельности" autocomplete="off" aria-describedby="name-hint">
                     <div id="name-suggestions" class="autocomplete-list"></div>
                 </div>
+                <p id="name-hint" class="field-hint">Выберите одно или несколько направлений из подсказок.</p>
+                <div id="name-selected" class="selected-values" aria-live="polite"></div>
             </div>
 
             <div class="form-group">
@@ -185,11 +240,23 @@
             </div>
 
             <div class="form-group">
-                <label for="account_num">Номер счёта перевозчика</label>
+                <label for="account_num">Счета перевозчика</label>
                 <div class="autocomplete-container">
-                    <input type="text" id="account_num" name="account_num" placeholder="Начните вводить счёт перевозчика" autocomplete="off" required>
+                    <input type="text" id="account_num" name="account_num" placeholder="Найти счёт перевозчика" autocomplete="off" aria-describedby="account-num-hint">
                     <div id="account-num-suggestions" class="autocomplete-list"></div>
                 </div>
+                <p id="account-num-hint" class="field-hint">Можно выбрать несколько счетов или оставить поле пустым.</p>
+                <div id="account_num-selected" class="selected-values" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_form">Форма оплаты</label>
+                <div class="autocomplete-container">
+                    <input type="text" id="payment_form" name="payment_form" placeholder="Выберите форму оплаты" autocomplete="off" aria-describedby="payment-form-hint">
+                    <div id="payment-form-suggestions" class="autocomplete-list"></div>
+                </div>
+                <p id="payment-form-hint" class="field-hint">Можно выбрать несколько значений или оставить поле пустым.</p>
+                <div id="payment_form-selected" class="selected-values" aria-live="polite"></div>
             </div>
 
             <div class="form-group">
@@ -260,11 +327,13 @@
             );
         }
 
-        function createAutocomplete(inputId, suggestionsId, values, maxResults = 50) {
+        function createAutocomplete(inputId, suggestionsId, values, multiple = false, maxResults = 50) {
             const input = document.getElementById(inputId);
             const suggestions = document.getElementById(suggestionsId);
             const valuesSet = new Set(values);
-            const preparedValues = values.map(value => ({
+            const selectedValues = new Set();
+            const selectedContainer = document.getElementById(`${inputId}-selected`);
+            const preparedValues = [...valuesSet].map(value => ({
                 original: value,
                 normalized: String(value).toLowerCase()
             }));
@@ -279,9 +348,37 @@
             }
 
             function selectValue(value) {
-                input.value = value;
+                if (multiple) {
+                    selectedValues.add(value);
+                    input.value = '';
+                    renderSelectedValues();
+                } else {
+                    input.value = value;
+                }
                 closeSuggestions();
                 input.focus();
+            }
+
+            function renderSelectedValues() {
+                selectedContainer.replaceChildren();
+                for (const value of selectedValues) {
+                    const tag = document.createElement('div');
+                    tag.className = 'selected-value';
+                    const label = document.createElement('span');
+                    label.textContent = value;
+                    const remove = document.createElement('button');
+                    remove.type = 'button';
+                    remove.textContent = '×';
+                    remove.setAttribute('aria-label', `Удалить ${value}`);
+                    remove.addEventListener('click', () => {
+                        selectedValues.delete(value);
+                        renderSelectedValues();
+                        input.focus();
+                        renderSuggestions();
+                    });
+                    tag.append(label, remove);
+                    selectedContainer.appendChild(tag);
+                }
             }
 
             function renderSuggestions() {
@@ -289,7 +386,7 @@
                 suggestions.innerHTML = '';
                 activeIndex = -1;
 
-                if (!search) {
+                if (!search && !multiple) {
                     closeSuggestions();
                     return;
                 }
@@ -297,6 +394,7 @@
                 const startsWith = [];
                 const contains = [];
                 for (const value of preparedValues) {
+                    if (multiple && selectedValues.has(value.original)) continue;
                     if (value.normalized.startsWith(search)) {
                         startsWith.push(value.original);
                     } else if (value.normalized.includes(search)) {
@@ -337,6 +435,7 @@
             }
 
             input.addEventListener('input', renderSuggestions);
+            input.addEventListener('focus', renderSuggestions);
             input.addEventListener('keydown', event => {
                 if (event.key === 'ArrowDown' && currentMatches.length > 0) {
                     event.preventDefault();
@@ -349,6 +448,9 @@
                 } else if (event.key === 'Enter' && activeIndex >= 0) {
                     event.preventDefault();
                     selectValue(currentMatches[activeIndex]);
+                } else if (event.key === 'Enter' && multiple && input.value.trim()) {
+                    event.preventDefault();
+                    if (valuesSet.has(input.value.trim())) selectValue(input.value.trim());
                 } else if (event.key === 'Escape') {
                     closeSuggestions();
                 }
@@ -356,19 +458,34 @@
             input.addEventListener('blur', () => setTimeout(closeSuggestions, 150));
 
             return {
-                getValue: () => input.value.trim(),
-                isValid: () => valuesSet.has(input.value.trim())
+                getValue: () => multiple ? [...selectedValues] : input.value.trim(),
+                commitPending: () => {
+                    if (multiple && valuesSet.has(input.value.trim())) selectValue(input.value.trim());
+                },
+                isValid: () => multiple
+                    ? input.value.trim() === '' && (selectedValues.size > 0 || ['account_num', 'payment_form'].includes(inputId))
+                    : valuesSet.has(input.value.trim()),
+                reset: () => {
+                    input.value = '';
+                    selectedValues.clear();
+                    if (multiple) renderSelectedValues();
+                    closeSuggestions();
+                }
             };
         }
 
         const businessLineAutocomplete = createAutocomplete(
-            'name', 'name-suggestions', readValues('business-lines-data')
+            'name', 'name-suggestions', readValues('business-lines-data'), true
         );
         const inspectionAutocomplete = createAutocomplete(
             'num_proverki', 'num-proverki-suggestions', readValues('nums-inspections-data')
         );
         const accountAutocomplete = createAutocomplete(
-            'account_num', 'account-num-suggestions', readValues('account-nums-data')
+            'account_num', 'account-num-suggestions', readValues('account-nums-data'), true
+        );
+        const paymentFormAutocomplete = createAutocomplete(
+            'payment_form', 'payment-form-suggestions',
+            ['Нал', 'Самозанятые', 'Кооператив', 'Интеграция', 'ГПХ', 'Безнал без НДС', 'Безнал с НДС'], true
         );
 
         const form = document.getElementById('check-form');
@@ -391,10 +508,17 @@
                     autocomplete: accountAutocomplete,
                     inputId: 'account_num',
                     error: 'Некорректный счёт перевозчика, исправьте!'
+                },
+                {
+                    autocomplete: paymentFormAutocomplete,
+                    inputId: 'payment_form',
+                    error: 'Выберите форму оплаты из списка или очистите поле поиска.'
                 }
             ];
 
             for (const field of autocompleteFields) {
+                field.autocomplete.commitPending();
+
                 if (!field.autocomplete.isValid()) {
                     alert(field.error);
                     document.getElementById(field.inputId).focus();
@@ -406,6 +530,7 @@
                 name: businessLineAutocomplete.getValue(),
                 num_proverki: inspectionAutocomplete.getValue(),
                 account_num: accountAutocomplete.getValue(),
+                payment_form: paymentFormAutocomplete.getValue(),
                 start_date: document.getElementById('start_date').value,
                 end_date: document.getElementById('end_date').value,
                 income: document.getElementById('income').value,
@@ -419,7 +544,7 @@
             button.textContent = 'Отправка...';
             button.disabled = true;
 
-            fetch('http://127.0.0.1:8000/senddata', {
+            fetch('/senddata', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -428,6 +553,7 @@
                     if (response.ok) {
                         alert('Данные были отправлены, ожидайте окончания проверки!');
                         form.reset();
+                        autocompleteFields.forEach(field => field.autocomplete.reset());
                         return;
                     }
                     return response.json().then(error => {

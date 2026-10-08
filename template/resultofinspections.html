@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сдача проверок</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8d7da, #1f1f1f);
+            color: #222;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .form-header {
+            padding: 30px;
+            color: #ffe3e6;
+            background: #2b2b2b;
+            border-top: 10px solid #e57373;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .form-header p {
+            margin: 10px 0 0;
+            color: #f5b5bb;
+            font-size: 16px;
+        }
+
+        form {
+            padding: 30px;
+            background: #fff5f6;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            padding: 20px;
+            background: #fff;
+            border-left: 5px solid #e57373;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2b2b2b;
+            font-weight: 600;
+        }
+
+        input,
+        textarea,
+        select {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 16px;
+            background: #fffafa;
+            border: none;
+            border-bottom: 2px solid #d98b91;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            background: #fff;
+            border-bottom-color: #b71c1c;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            padding: 14px 30px;
+            color: #ffe3e6;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            background: #2b2b2b;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            color: #1f1f1f;
+            background: #e57373;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            z-index: 1000;
+            top: 100%;
+            right: 0;
+            left: 0;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #d98b91;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.18);
+        }
+
+        .autocomplete-item,
+        .autocomplete-empty {
+            padding: 10px 12px;
+            font-size: 14px;
+        }
+
+        .autocomplete-item {
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background: #ffe3e6;
+        }
+
+        .autocomplete-empty {
+            color: #777;
+        }
+
+        .source-data {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div>Hello world!</div>
+</body>
+</html>

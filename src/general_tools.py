@@ -28,6 +28,7 @@ def format_data_to_uat(data_from_user: dict) -> dict:
     structrura_json = {
             'NameOfProject': data_from_user.get('name'),
             'AccountNum': data_from_user.get('account_num'),
+            'PaymentForm': data_from_user.get('payment_form', []),
             'Proverka': data_from_user.get('num_proverki'),
             'Income': data_from_user.get('income'),
             'Expense': data_from_user.get('expense'),
@@ -51,13 +52,18 @@ def send_request_to_1c(data=None, endpoint=None):
         'Accept': 'application/json',
         'Authorization': PROXY_TOKEN
     }
+    try:
+         
+        if data is None:
+                response = requests.get(url=url_1c, headers=headers)
+        else:
+                response = requests.post(url=url_1c, headers=headers, json=data)
 
-    if data is None:
-        response = requests.get(url=url_1c, headers=headers)
-    else:
-        response = requests.post(url=url_1c, headers=headers, json=data)
-
-    return response
+        response.raise_for_status()
+        return response
+    
+    except requests.exceptions.HTTPError as e:
+        return e.response
 
 
 def get_business_lines():

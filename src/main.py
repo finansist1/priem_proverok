@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from src.general_tools import (
@@ -16,6 +16,7 @@ from datetime import datetime
 app = FastAPI()
 
 templates = Jinja2Templates(directory="template")
+
 
 
 @app.get('/proverka')
@@ -61,6 +62,7 @@ def get_data_from_front(data: dict):
     data_to_send['start_date'] = data.get('start_date')
     data_to_send['end_date'] = data.get('end_date')
     data_to_send['account_num'] = data.get('account_num')
+    data_to_send['payment_form'] = data.get('payment_form', [])
     data_to_send['comment'] = data.get('comment')      
 
 
@@ -68,12 +70,19 @@ def get_data_from_front(data: dict):
     end_date_obj = datetime.strptime(data_to_send.get('end_date'), '%Y-%m-%d').strftime('%d.%m.%Y')
 
 
+    business_lines = data_to_send.get('name')
+    account_nums = data_to_send.get('account_num')
+    business_lines_text = ', '.join(business_lines) if isinstance(business_lines, list) else business_lines
+    account_nums_text = ', '.join(account_nums) if isinstance(account_nums, list) else account_nums
+    payment_form_text = ', '.join(data_to_send['payment_form']) or 'Не указана'
+
     message = (
-        f'{data_to_send.get('name')}\n'
+        f'{business_lines_text}\n'
         f'{start_date_obj} - {end_date_obj}\n'
         f'--------------------------------\n'
         f'Счет проверки: {data_to_send.get('num_proverki')}\n'
-        f'Счет перевозчика: {data_to_send.get('account_num')}\n'
+        f'Счет перевозчика: {account_nums_text}\n'
+        f'Форма оплаты: {payment_form_text}\n'
         f'Сумма дохода: {data_to_send.get('income')}\n'
         f'Сумма расхода: {data_to_send.get('expense')}\n'
         f'Сумма топлива: {data_to_send.get('fuel')}\n'
@@ -84,8 +93,20 @@ def get_data_from_front(data: dict):
     )
 
     send_message_to_tg(text=message)
+    
     response_1c = send_request_to_1c(data=format_data_to_uat(data_from_user=data_to_send),endpoint='accept_inspections')
 
+    print(response_1c.status_code)
+    print(response_1c.text)
+    response_1c.raise_for_status()
     report_text = response_1c.content.decode("utf-8-sig")
 
     print(report_text)
+
+
+
+# @app.get('/resultofinspections')
+# def render_template_reult(request: Request):
+#     """Перенаправляет клиента на страницу, где он будет ждать результаты проверки"""
+
+#     return templates.TemplateResponse(request, 'resultofinspections.html')
